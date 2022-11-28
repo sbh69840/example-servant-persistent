@@ -15,13 +15,12 @@ executable example-servant-persistent
   other-modules:       Api
                      , App
                      , Models
-  build-depends:       base >=4.8 && <=5.1
+  build-depends:       base >=4.8 && <4.11
                      , aeson
                      , monad-logger
                      , persistent
                      , persistent-template
                      , persistent-sqlite
-                     , persistent-postgresql
                      , servant
                      , servant-server
                      , string-conversions
@@ -48,7 +47,6 @@ test-suite spec
                      , monad-logger
                      , persistent-template
                      , persistent-sqlite
-                     , persistent-postgresql
                      , transformers
                      , wai
                      , servant

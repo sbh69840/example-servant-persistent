@@ -21,7 +21,6 @@ import           Servant
 
 import           Api
 import           Models
-import Database.Persist.Postgresql
 
 server :: ConnectionPool -> Server Api
 server pool =
@@ -32,7 +31,7 @@ server pool =
 
     userAdd :: User -> IO (Maybe (Key User))
     userAdd newUser = flip runSqlPersistMPool pool $ do
-      exists <- selectFirst [UserName ==. userName newUser] []
+      exists <- selectFirst [UserName ==. (userName newUser)] []
       case exists of
         Nothing -> Just <$> insert newUser
         Just _ -> return Nothing
@@ -45,16 +44,14 @@ server pool =
 app :: ConnectionPool -> Application
 app pool = serve api $ server pool
 
-connStr :: ConnectionString
-connStr = "host=localhost dbname=testdb user=postgres password= port=5432"
-
-mkApp :: IO Application
-mkApp = do
+mkApp :: FilePath -> IO Application
+mkApp sqliteFile = do
   pool <- runStderrLoggingT $ do
-    createPostgresqlPool connStr 5
+    createSqlitePool (cs sqliteFile) 5
+
   runSqlPool (runMigration migrateAll) pool
   return $ app pool
 
-run :: IO ()
-run =
-  Warp.run 3000 =<< mkApp
+run :: FilePath -> IO ()
+run sqliteFile =
+  Warp.run 3000 =<< mkApp sqliteFile
